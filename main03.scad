@@ -1,4 +1,5 @@
 
+// EXTR.  if could manage the lip on both sides - we could stack with only a single slab section the middle separator
 
 // not sure if a complicate subtraction is the right way to go
 // also this isn't quite correct
