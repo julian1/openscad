@@ -1,23 +1,10 @@
-
-// it might be easier to just give it a lip of 1.2 + margin eg. 1.3
-// simplies all the dimensions.
-
-// for flange with top/bottom recesses 
-// we would have 0.8 + 0.8 + 0.4 = 2mm
-// while for two pieces we would get 1.2 * 2 == 2.4mm
-
-// use singdole file and view both shapes, then just prefix with '%' when generate
-// manufacturing stl
-
+ 
  
 $fn = 20;
 
- 
- 
-// Wall thickness>1.2mm, thinnest part≥0.8mm
- 
 
-fudge = 0.2;
+// Wall thickness>1.2mm, thinnest part≥0.8mm
+  
 
 radii = 2;
  
@@ -31,7 +18,7 @@ outery = 48;
 
 
 // need a pro-trusion to meet minimum specs - 0.2,0.2,10
-color("yellow")
+%color("yellow")
  linear_extrude(10) {       
        // circ 
      translate([0, -(innery /2 + 5), 0 ] )
@@ -39,16 +26,26 @@ color("yellow")
 }
 
 
-
-holeface = 0.4;  // top , yello
-endface = 0.8;    // bottom blue
-wall = 1.2;    // 0.4 + 0.8
+ 
+wall = 1.2;
       
-     
+/*
+    EXTR. tab must be set to wall thickness. 
+        and cannot protrude past the box perimeter
+    - otherwise the wound coil cannot be slid off.
+*/
 
-// top of flat part 0.8mm. with recess to hold vertical wall. extends above horizontal
-// now 0.4mm
-color("yellow")
+tabx = wall;
+taby = 5;
+
+fudge = 0.3;  // not div
+tabxf = tabx + fudge;
+tabyf = taby + fudge;
+
+      
+
+// horizontal flange
+%color("yellow")
  linear_extrude( wall) { 
  
     difference() {  
@@ -63,19 +60,21 @@ color("yellow")
         group() {
             square( [innerx , innery  ], center = true);
             
-        
-           translate( [ innerx / 2  + wall / 2 ,0, 0 ] )
-            square( [wall, 3 ] , center = true);
+           // right
+           translate( [ innerx / 2  + tabx / 2 ,0, 0 ] )
+            square( [tabxf, tabyf ] , center = true);
      
-           translate( [ -innerx / 2  - wall / 2 ,0, 0 ] )
-            square( [wall, 3 ] , center = true);
+           // left
+           translate( [ -innerx / 2  - tabx / 2 ,0, 0 ] )
+            square( [tabxf, tabyf ] , center = true);
         
-
-           translate( [  0,  +innery / 2  + wall / 2 , 0 ] )
-            square( [ 3, wall  ] , center = true); 
+           // top
+           translate( [  0,  +innery / 2  + tabx / 2 , 0 ] )
+            square( [ tabyf, tabxf  ] , center = true); 
            
-           translate( [  0,  -innery / 2  - wall / 2 , 0 ] )
-            square( [ 3, wall  ] , center = true); 
+           // bottom
+           translate( [  0,  -innery / 2  - tabx / 2 , 0 ] )
+            square( [ tabyf, tabxf  ] , center = true); 
             
             
             /*
@@ -93,104 +92,89 @@ color("yellow")
 } 
 
 
-
-// tabx   and taby
- 
  
 //
 // % transparent
+// # easier to see
+// box/ former
 
-// vertical wall height, for visualization only
-// actually may want to generate both parts in the same file
-translate([0,0, 7 ] ) { 
+// just define once, instead of having extra band
+// main07-b wall + 0;  main07-c wall + 1;
+bodywall= wall + 1;
+
+// eg. 16mm. and 2 bobbins, with end faces
+// main07-d use 15mm.
+height  = 15 / 2 - wall * 2;
+
+/* 
+ if use  half wall for tab depth, then the flange can have two bobbins at each end.
+ but if tab - is <1.2mm it may not be manufacturable
+ perhaps need to try making both
+ wall / 2;  // only for positive shape
+*/
+tabz =  wall ; // / 2
+
+translate([0,0, wall + 0 ] ) {    
 
  // eg. we (16 / 2) -0.4 - 0.4
- linear_extrude(16 / 2 - wall * 2) 
+ linear_extrude(  height) 
     difference() {  
 
-        square( [innerx + (wall * 2), innery + (wall * 2)], center = true);
+        square( [innerx + (bodywall * 2), innery + (bodywall * 2)], center = true);
         square( [innerx , innery  ], center = true);
   }  
   
   
+    // bottom tabs
   
-  translate( [ innerx / 2  + wall / 2 , 0, -wall  ] )
-    linear_extrude( wall ) 
-        square( [wall, 3 ] , center = true);
+    // right
+    translate( [ innerx / 2  + tabx / 2 , 0, -tabz  ] )
+    linear_extrude( tabz ) 
+        square( [tabx, taby ] , center = true);
   
-    translate( [ -innerx / 2  - wall / 2 , 0, -wall  ] )
-    linear_extrude( wall ) 
-        square( [wall, 3 ] , center = true);
+    // left
+    translate( [ -innerx / 2  - tabx / 2 , 0, -tabz  ] )
+    linear_extrude( tabz ) 
+        square( [tabx, taby ] , center = true);
   
+    // top
+    translate( [ 0, innery / 2  + tabx / 2 , -tabz  ] )
+    linear_extrude( tabz) 
+        square( [ taby, tabx  ] , center = true);
   
-    translate( [ 0, innery / 2  + wall / 2 , -wall  ] )
-    linear_extrude( wall ) 
-        square( [3, wall  ] , center = true);
-  
-     translate( [ 0, -innery / 2  - wall / 2 , -wall  ] )
-    linear_extrude( wall ) 
-        square( [3, wall  ] , center = true);
-  
-}
-
-
-
-
-pad = 1;
-
-%translate([0,0,15] ) { 
-
-    group() {
- 
-        // inner square
-     linear_extrude(16 / 2 - endface * 2) 
-        difference() {  
-            square( [innerx + (wall * 2), innery + (wall* 2)], center = true);
-            square( [innerx , innery  ], center = true);
-      }  
-
-    // band
-    translate([0,0, + holeface  ])
-     linear_extrude(16 / 2 - wall * 2)  
-        difference() {  
-            square( [innerx + (wall * 2) + (pad * 2), innery + (wall * 2) + (pad * 2) ], center = true);
-            square( [innerx , innery  ], center = true);
-        }
-    }
-}
-
-
-pad2 = 2;
-
-%translate([0,0,25] ) { 
-
-    group() {
+    // bottom
+    translate( [ 0, -innery / 2  - tabx / 2 , -tabz  ] )
+    linear_extrude( tabz) 
+        square( [taby, tabx  ] , center = true);
         
-     // inner square
-     linear_extrude(16 / 2 - endface * 2) 
-        difference() {  
-            square( [innerx + (wall * 2), innery + (wall * 2) ], center = true);
-            square( [innerx , innery  ], center = true);
-      }  
-
-    // band
-    translate([0,0, + holeface  ])
-     linear_extrude(16 / 2 - wall * 2)  
-        difference() {  
-            square( [innerx + (wall * 2) + (pad2 * 2), innery + (wall * 2) + (pad2 * 2)], center = true);
-            square( [innerx , innery  ], center = true);
-        }
-      
-    }
-      
+   // top tabs     
+   
+   
+    // right
+    translate( [ innerx / 2  + tabx / 2 , 0, height   ] )
+    linear_extrude( tabz ) 
+        square( [tabx, taby ] , center = true);
+        
+    // left
+    translate( [ -innerx / 2  - tabx / 2 , 0, height  ] )
+    linear_extrude( tabz ) 
+        square( [tabx, taby ] , center = true);
+  
+    // top
+    translate( [ 0, innery / 2  + tabx / 2 ,  height ] )
+    linear_extrude( tabz ) 
+        square( [ taby, tabx  ] , center = true);
+  
+    // bottom
+    translate( [ 0, -innery / 2  - tabx / 2 , height  ] )
+    linear_extrude( tabz) 
+        square( [taby, tabx  ] , center = true);
+        
+  
+  
 }
 
 
+ 
 
-
-
-// can print derived parameter
-echo (  "whoot", wall + fudge );
-
-
-
+ 
