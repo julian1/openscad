@@ -1,4 +1,9 @@
  
+/*
+    the way to handle generation of multiple stl files, with slightly varying parameters
+   is just to import this as a module.
+    
+*/
  
 $fn = 20;
 
