@@ -19,8 +19,13 @@ $fn = 20;
 // include <43VA-1.2mm.scad>
 // include <43VA-2mm.scad>
 // include <43VA-half-1.2mm.scad>
-include <43VA-half-2mm.scad>
+// include <43VA-half-2mm.scad>
 
+
+// include <25VA-1.2mm.scad>
+// include <25VA-2mm.scad>
+// include <25VA-half-1.2mm.scad>
+include <25VA-half-2mm.scad>
 
 
 
